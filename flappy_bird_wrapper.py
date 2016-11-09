@@ -1,10 +1,6 @@
-import numpy as np
-import sys
 import random
 import pygame
 import flappy_bird_utils as fpu
-import pygame.surfarray as surfarray
-from pygame.locals import *
 from itertools import cycle
 
 # Game Global variables
@@ -28,6 +24,8 @@ PIPE_HEIGHT = IMAGES['pipe'][0].get_height()
 BACKGROUND_WIDTH = IMAGES['background'].get_width()
 
 PLAYER_INDEX_GEN = cycle([0, 1, 2, 1])
+
+REWARDS = {'failure': -1.0, 'success': 1.0, 'default': 0.0}
 
 
 def getRandomPipe():
@@ -145,8 +143,8 @@ class GameState:
             if pipeMidPos <= playerMidPos < pipeMidPos + 4:
                 self.score += 1
                 # SOUNDS['point'].play()
-                return 1
-        return 0
+                return REWARDS['success']
+        return REWARDS['default']
 
     def move_pipes(self):
         """
@@ -178,20 +176,28 @@ class GameState:
         # draw sprites
         SCREEN.blit(IMAGES['background'], (0, 0))
 
+        # Prepare image data for preprocessing
+        image_data = []
+
         for uPipe, lPipe in zip(self.upperPipes, self.lowerPipes):
             SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
+            image_data.append((IMAGES['pipe'][0], (uPipe['x'], uPipe['y'])))
             SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
+            image_data.append((IMAGES['pipe'][1], (lPipe['x'], lPipe['y'])))
 
         SCREEN.blit(IMAGES['base'], (self.basex, BASEY))
+        image_data.append((IMAGES['base'], (self.basex, BASEY)))
         # print score so player overlaps the score
         self.showScore()
         SCREEN.blit(IMAGES['player'][self.playerIndex],
                     (self.playerx, self.playery))
+        image_data.append((IMAGES['player'][self.playerIndex],
+                    (self.playerx, self.playery)))
 
-        image_data = pygame.surfarray.array3d(pygame.display.get_surface())
         pygame.display.update()
         FPSCLOCK.tick(FPS)
         # print self.upperPipes[0]['y'] + PIPE_HEIGHT - int(BASEY * 0.2)
+        return image_data
 
     def showScore(self):
         """displays score in center of screen"""
@@ -235,10 +241,10 @@ class GameState:
             # Restart the game
             self.__init__()
             # Give a negative reward
-            reward = -1
 
         # Check if we scored a point
         reward = self.check_score()
+        reward = REWARDS['failure'] if isCrash else reward
 
         # playerIndex basex change
         if (self.loopIter + 1) % 3 == 0:
@@ -257,4 +263,7 @@ class GameState:
 
         # Move the screen to the left
         self.move_screen()
+
+        # draw the sprites and return the image
+        return self.draw_sprites(), terminal, reward
 
