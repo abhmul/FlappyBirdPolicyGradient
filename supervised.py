@@ -3,7 +3,7 @@ from PIL import Image
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from keras.utils.np_utils import to_categorical
 from keras.models import Sequential
@@ -112,11 +112,11 @@ history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(y
                               callbacks=[ModelCheckpoint('models/conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
                                                          monitor='val_loss', verbose=0, save_best_only=False,
                                                          save_weights_only=True, mode='auto')])
-
-plt.plot(history.history['val_loss'],'o-')
-plt.plot(history.history['loss'],'o-')
-plt.xlabel('Number of Iterations')
-plt.ylabel('Categorical Crossentropy')
-plt.title('Train Error vs Number of Iterations')
-
-plt.show()
+#
+# plt.plot(history.history['val_loss'],'o-')
+# plt.plot(history.history['loss'],'o-')
+# plt.xlabel('Number of Iterations')
+# plt.ylabel('Categorical Crossentropy')
+# plt.title('Train Error vs Number of Iterations')
+#
+# plt.show()
