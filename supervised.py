@@ -7,7 +7,8 @@ import numpy as np
 
 from keras.utils.np_utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout
+from keras.layers import Activation, Dense, Flatten, Dropout
+from keras.layers.convolutional import Convolution2D
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing.image import img_to_array, random_shift
 
