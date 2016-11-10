@@ -1,7 +1,10 @@
 import numpy as np
 from PIL.Image import fromarray
 from PIL import Image
-from pygame.surfarray import array3d
+try:
+    from pygame.surfarray import array3d
+except ImportError:
+    array3d = None
 
 from keras.preprocessing.image import img_to_array, array_to_img
 
