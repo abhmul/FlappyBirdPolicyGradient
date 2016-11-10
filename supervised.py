@@ -109,20 +109,20 @@ Xtr, ytr, Xval, yval = split_data(X_full, y_full)
 
 model = conv_model()
 if BACK_COMPAT:
-    try:
-        history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
-                                      validation_data=batch_gen(Xval, yval, shifts=False),
-                                      validation_samples=normalize(yval[:, 1]).shape[0],
-                                      callbacks=[
-                                          ModelCheckpoint('conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
-                                                          monitor='val_loss', verbose=0, save_best_only=False,
-                                                          mode='auto')])
-    # except:
-    #     history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
-    #                                   validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
-    #                                   callbacks=[ModelCheckpoint('models/conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
-    #                                                              monitor='val_loss', verbose=0, save_best_only=False,
-    #                                                              save_weights_only=True, mode='auto')])
+    # try:
+    history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
+                                  validation_data=batch_gen(Xval, yval, shifts=False),
+                                  validation_samples=normalize(yval[:, 1]).shape[0],
+                                  callbacks=[
+                                      ModelCheckpoint('conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+                                                      monitor='val_loss', verbose=0, save_best_only=False,
+                                                      mode='auto')])
+# except:
+#     history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
+#                                   validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
+#                                   callbacks=[ModelCheckpoint('models/conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+#                                                              monitor='val_loss', verbose=0, save_best_only=False,
+#                                                              save_weights_only=True, mode='auto')])
 # plt.plot(history.history['val_loss'],'o-')
 # plt.plot(history.history['loss'],'o-')
 # plt.xlabel('Number of Iterations')
