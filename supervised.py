@@ -11,6 +11,9 @@ from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing.image import img_to_array, random_shift
 
+from keras import backend as K
+K.set_image_dim_ordering('th')
+
 from preprocessor import RESIZE
 
 FRAMES = 8
