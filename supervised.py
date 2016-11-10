@@ -7,7 +7,7 @@ import numpy as np
 
 from keras.utils.np_utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Activation, Dense, Flatten, Dropout
+from keras.layers.core import Dense, Flatten, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing.image import img_to_array, random_shift
@@ -81,16 +81,11 @@ def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
 def conv_model(frames=FRAMES):
     model = Sequential()
     model.add(Convolution2D(32, 8, 8, subsample=(2, 2),
-                            input_shape=(frames, RESIZE[1], RESIZE[0])))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 4, 4))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(128, 4, 4))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(128, 4, 4))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(128, 4, 4))
-    model.add(Activation('relu'))
+                            input_shape=(frames, RESIZE[1], RESIZE[0]), activation='relu'))
+    model.add(Convolution2D(64, 4, 4, activation='relu'))
+    model.add(Convolution2D(128, 4, 4, activation='relu'))
+    model.add(Convolution2D(128, 4, 4, activation='relu'))
+    model.add(Convolution2D(128, 4, 4, activation='relu'))
     model.add(Flatten())
     model.add(Dense(200, activation='relu'))
     model.add(Dropout(.5))
