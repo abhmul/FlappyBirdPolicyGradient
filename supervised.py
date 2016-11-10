@@ -111,7 +111,7 @@ history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(y
                               validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
                               callbacks=[ModelCheckpoint('models/conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
                                                          monitor='val_loss', verbose=0, save_best_only=False,
-                                                         save_weights_only=True, mode='auto')])
+                                                         mode='auto')])
 #
 # plt.plot(history.history['val_loss'],'o-')
 # plt.plot(history.history['loss'],'o-')
