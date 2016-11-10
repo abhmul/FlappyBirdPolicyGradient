@@ -14,7 +14,7 @@ SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 pygame.display.set_caption('Flappy Bird')
 
 IMAGES, SOUNDS, HITMASKS = fpu.load()
-PIPEGAPSIZE = 100 # gap between upper and lower part of pipe
+PIPEGAPSIZE = 300 # gap between upper and lower part of pipe
 BASEY = SCREENHEIGHT * 0.79
 
 PLAYER_WIDTH = IMAGES['player'][0].get_width()
@@ -25,7 +25,7 @@ BACKGROUND_WIDTH = IMAGES['background'].get_width()
 
 PLAYER_INDEX_GEN = cycle([0, 1, 2, 1])
 
-REWARDS = {'failure': -1.0, 'success': 1.0, 'default': 0.0}
+REWARDS = {'failure': -1., 'success': 1., 'default': 0}
 
 
 def getRandomPipe():
@@ -53,6 +53,9 @@ def checkCrash(player, upperPipes, lowerPipes):
     # if player crashes into ground
     if player['y'] + player['h'] >= BASEY - 1:
         return True
+    elif player['y'] == 0:
+        return True
+
     else:
 
         playerRect = pygame.Rect(player['x'], player['y'],

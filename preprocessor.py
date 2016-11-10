@@ -5,7 +5,7 @@ from pygame.surfarray import array3d
 
 from keras.preprocessing.image import img_to_array, array_to_img
 
-RESIZE = (94, 94)
+RESIZE = (80, 80)
 
 def preprocess_image(image):
     """
@@ -16,7 +16,9 @@ def preprocess_image(image):
     # image.convert('L').save('test.png')
     img_array = img_to_array(image)[0]
     # print img_array.shape
-    return np.around(img_array / 255.0)
+    img_array /= 255.0
+    img_array = img_array > 0.0
+    return img_array
 
 def pyg_to_pil(image):
     arr_img = array3d(image)
@@ -36,11 +38,14 @@ def combine_screen(images, screen_size):
     for img, (posx, posy) in images:
         # Overlay the images
         image.paste(pyg_to_pil(img), (int(posy), int(posx)))
-    image.save('test.png')
+    # image.save('test.png')
     # Turn it into an array and return
-    return img_to_array(image)
+    return image
 
 def preprocess_screen(images, screen_size):
 
     screen = combine_screen(images, screen_size)
-    return preprocess_image(array_to_img(screen).resize(RESIZE))
+    return preprocess_image(screen.resize(RESIZE))
+
+def clean_screen(arr_img):
+    return array_to_img((arr_img*255).reshape((1,)+(RESIZE[1], RESIZE[0])))
