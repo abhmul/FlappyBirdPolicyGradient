@@ -16,7 +16,7 @@ K.set_image_dim_ordering('th')
 
 from preprocessor import RESIZE
 
-FRAMES = 8
+FRAMES = 5
 ACTIONS = 2
 
 # fix random seed for reproducibility
