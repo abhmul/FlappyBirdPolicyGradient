@@ -1,5 +1,7 @@
 import numpy as np
+from PIL.Image import fromarray
 from PIL import Image
+from pygame.surfarray import array3d
 
 from keras.preprocessing.image import img_to_array, array_to_img
 
@@ -11,9 +13,14 @@ def preprocess_image(image):
     :param image: image to process
     :return: binary version of the image as an array
     """
-
-    img_array = img_to_array(image.convert('L'))
+    # image.convert('L').save('test.png')
+    img_array = img_to_array(image)[0]
+    # print img_array.shape
     return np.around(img_array / 255.0)
+
+def pyg_to_pil(image):
+    arr_img = array3d(image)
+    return fromarray(arr_img).convert('L')
 
 def combine_screen(images, screen_size):
     """
@@ -23,16 +30,15 @@ def combine_screen(images, screen_size):
     :return: The combined image with only the selected portions white
     """
 
-    # Create the image array
-    screen = np.zeros(screen_size)
+    # Create the background screen
+    image = Image.new('L', screen_size)
+    # print image.size
     for img, (posx, posy) in images:
-        img_arr = preprocess_image(img)
-        # Get the right and top edge values
-        endx = min(screen_size[0], posx + img_arr.shape[0])
-        endy = min(screen_size[1], posy + img_arr.shape[1])
-        # Put the img onto the screen
-        screen[posx:endx, posy:endy] = img_arr
-    return screen
+        # Overlay the images
+        image.paste(pyg_to_pil(img), (int(posy), int(posx)))
+    image.save('test.png')
+    # Turn it into an array and return
+    return img_to_array(image)
 
 def preprocess_screen(images, screen_size):
 
