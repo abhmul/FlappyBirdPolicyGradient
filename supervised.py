@@ -7,8 +7,7 @@ import numpy as np
 
 from keras.utils.np_utils import to_categorical
 from keras.models import Sequential
-from keras.layers.core import Dense, Flatten, Dropout
-from keras.layers.convolutional import Convolution2D
+from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing.image import img_to_array, random_shift
 
@@ -16,7 +15,6 @@ from preprocessor import RESIZE
 
 FRAMES = 8
 ACTIONS = 2
-BACK_COMPAT = True
 
 # fix random seed for reproducibility
 seed = 7
@@ -82,11 +80,16 @@ def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
 def conv_model(frames=FRAMES):
     model = Sequential()
     model.add(Convolution2D(32, 8, 8, subsample=(2, 2),
-                            input_shape=(frames, RESIZE[1], RESIZE[0]), activation='relu'))
-    model.add(Convolution2D(64, 4, 4, activation='relu'))
-    model.add(Convolution2D(128, 4, 4, activation='relu'))
-    model.add(Convolution2D(128, 4, 4, activation='relu'))
-    model.add(Convolution2D(128, 4, 4, activation='relu'))
+                            input_shape=(frames, RESIZE[1], RESIZE[0])))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 4, 4))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(128, 4, 4))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(128, 4, 4))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(128, 4, 4))
+    model.add(Activation('relu'))
     model.add(Flatten())
     model.add(Dense(200, activation='relu'))
     model.add(Dropout(.5))
@@ -108,12 +111,12 @@ y_full = to_categorical(y_full, ACTIONS)
 Xtr, ytr, Xval, yval = split_data(X_full, y_full)
 
 model = conv_model()
-if BACK_COMPAT:
-    history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
-                                  validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
-                                  callbacks=[ModelCheckpoint('models/conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
-                                                             monitor='val_loss', verbose=0, save_best_only=False,
-                                                             save_weights_only=True, mode='auto')])
+history = model.fit_generator(batch_gen(Xtr, ytr), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
+                              validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
+                              callbacks=[ModelCheckpoint('models/conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+                                                         monitor='val_loss', verbose=0, save_best_only=False,
+                                                         save_weights_only=True, mode='auto')])
+#
 # plt.plot(history.history['val_loss'],'o-')
 # plt.plot(history.history['loss'],'o-')
 # plt.xlabel('Number of Iterations')
