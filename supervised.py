@@ -45,9 +45,9 @@ def normalize(y, frames=FRAMES):
 
 def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
     # adapted from chenglong code for fiting from generator (https://www.kaggle.com/c/talkingdata-mobile-user-demographics/forums/t/22567/neural-network-for-sparse-matrices)
-    number_of_batches = np.ceil(X.shape[0] / batch_size)
     counter = 0
     sample_index = normalize(y[:, 1])
+    number_of_batches = np.ceil(sample_index.shape[0] / batch_size)
     if shuffle:
         np.random.shuffle(sample_index)
     while True:
@@ -55,7 +55,7 @@ def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
         X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
         for i, ind in enumerate(batch_index):
             if shifts:
-                X_batch[i] = random_shift(X[ind-frames+1:ind+1, :], .25, .25)
+                X_batch[i] = random_shift(X[ind-frames+1:ind+1, :], .1, .1)
             else:
                 X_batch[i] = X[ind - frames + 1:ind + 1, :]
         y_batch = y[batch_index]
@@ -66,7 +66,7 @@ def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
             X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
             for i, ind in enumerate(batch_index):
                 if shifts:
-                    X_batch[i] = random_shift(X[ind - frames + 1:ind + 1, :], .25, .25)
+                    X_batch[i] = random_shift(X[ind - frames + 1:ind + 1, :], .1, .1)
                 else:
                     X_batch[i] = X[ind - frames + 1:ind + 1, :]
             y_batch = y[batch_index]
