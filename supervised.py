@@ -46,7 +46,7 @@ def normalize(y, frames=FRAMES):
     amount = (1 - percent) / percent
     return np.hstack([np.arange(frames-1, y.shape[0])] + [inds[0] for i in xrange(int(amount))])
 
-def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
+def batch_gen(X, y, frames=FRAMES, batch_size=128, shuffle=True, shifts=True):
     # adapted from chenglong code for fiting from generator (https://www.kaggle.com/c/talkingdata-mobile-user-demographics/forums/t/22567/neural-network-for-sparse-matrices)
     counter = 0
     sample_index = normalize(y[:, 1])
