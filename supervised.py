@@ -13,7 +13,7 @@ from keras.preprocessing.image import img_to_array, random_shift
 
 from preprocessor import RESIZE
 
-FRAMES = 4
+FRAMES = 8
 ACTIONS = 2
 
 # fix random seed for reproducibility
@@ -79,12 +79,16 @@ def batch_gen(X, y, frames=FRAMES, batch_size=32, shuffle=True, shifts=True):
 
 def conv_model(frames=FRAMES):
     model = Sequential()
-    model.add(Convolution2D(32, 8, 8, subsample=(4, 4),
+    model.add(Convolution2D(32, 8, 8, subsample=(2, 2),
                             input_shape=(frames, RESIZE[1], RESIZE[0])))
     model.add(Activation('relu'))
-    model.add(Convolution2D(64, 4, 4, subsample=(2, 2)))
+    model.add(Convolution2D(64, 4, 4))
     model.add(Activation('relu'))
-    model.add(Convolution2D(128, 2, 2))
+    model.add(Convolution2D(128, 4, 4))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(128, 4, 4))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(128, 4, 4))
     model.add(Activation('relu'))
     model.add(Flatten())
     model.add(Dense(200, activation='relu'))
