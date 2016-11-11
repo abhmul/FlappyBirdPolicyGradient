@@ -193,7 +193,7 @@ def fit(model, ep_batch=1):
 
 def main():
     model = model2()
-    model.load_weights('models/2100eps_2.2r_1scr_weights.h5')
+    model.load_weights('models/15500eps_0.7r_1scr_weights.h5')
     fit(model)
 
 if __name__ == '__main__':

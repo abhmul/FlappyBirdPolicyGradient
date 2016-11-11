@@ -6,8 +6,8 @@ import numpy as np
 # import matplotlib.pyplot as plt
 
 from keras.utils.np_utils import to_categorical
-from keras.models import Sequential
-from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout, ZeroPadding2D
+from keras.models import Sequential, Model
+from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout, ZeroPadding2D, Input, merge
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing.image import img_to_array, random_shift
 
@@ -142,6 +142,29 @@ def deep_model():
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
     return model
 
+def line_model():
+    img = Input((1, RESIZE[1], RESIZE[0]), name='image')
+
+    x = Convolution2D(64, 3, RESIZE[0], activation='relu')(img)
+    y = Convolution2D(64, RESIZE[1], 3, activation='relu')(img)
+
+    x = Flatten()(x)
+    y = Flatten()(y)
+
+    xy = merge([x, y], mode='concat')
+
+    xy = Dense(4096, activation='relu')(xy)
+    xy = Dropout(0.5)(xy)
+    xy = Dense(1024, activation='relu')(xy)
+    xy = Dropout(0.5)(xy)
+    predictions = Dense(2, activation='softmax')(xy)
+
+    model = Model(input=img, output=predictions)
+
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+    return model
+
 
 def split_data(X, y, split=.9):
 
@@ -154,7 +177,7 @@ X_full, y_full = load_data()
 y_full = to_categorical(y_full, ACTIONS)
 Xtr, ytr, Xval, yval = split_data(X_full, y_full)
 
-model = deep_model()
+model = line_model()
 history = model.fit_generator(batch_gen(Xtr, ytr, shifts=False), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
                               validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
                               callbacks=[ModelCheckpoint('conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
