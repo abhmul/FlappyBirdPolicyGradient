@@ -145,8 +145,8 @@ def deep_model():
 def line_model():
     img = Input((1, RESIZE[1], RESIZE[0]), name='image')
 
-    xs = [Convolution2D(2**(7+(1-i)/2), i, RESIZE[0], activation='relu')(img) for i in xrange(1, 10, 2)]
-    ys = [Convolution2D(2**(7+(1-i)/2), RESIZE[1], i, activation='relu')(img) for i in xrange(1, 10, 2)]
+    xs = [Convolution2D(2**(7+(1-i)/2), i, RESIZE[0], subsample=(i, 1), activation='relu')(img) for i in xrange(1, 10, 2)]
+    ys = [Convolution2D(2**(7+(1-i)/2), RESIZE[1], i, subsample=(1, i), activation='relu')(img) for i in xrange(1, 10, 2)]
 
     xs = [Flatten()(x) for x in xs]
     ys = [Flatten()(y) for y in ys]
