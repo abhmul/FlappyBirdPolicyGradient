@@ -143,6 +143,10 @@ def deep_model():
     model.add(Dropout(0.5))
     model.add(Dense(2, activation='softmax'))
 
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+    return model
+
+
 def split_data(X, y, split=.9):
 
     ind = int(y.shape[0] * split)
