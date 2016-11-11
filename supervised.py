@@ -55,10 +55,11 @@ def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=False, di
         np.random.shuffle(sample_index)
     while True:
         batch_index = sample_index[batch_size * counter:batch_size * (counter + 1)]
-        X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
         if difference:
             X_batch = X[batch_index] - X[batch_index-1]
+            X_batch = X_batch.reshape(-1, 1, RESIZE[1], RESIZE[0])
         else:
+            X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
             for i, ind in enumerate(batch_index):
                 if shifts:
                     X_batch[i] = random_shift(X[ind-frames+1:ind+1, :], .1, .1)
@@ -69,10 +70,11 @@ def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=False, di
         yield X_batch, y_batch
         if counter == number_of_batches - 1:
             batch_index = sample_index[batch_size * counter:]
-            X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
             if difference:
                 X_batch = X[batch_index] - X[batch_index - 1]
+                X_batch = X_batch.reshape(-1, 1, RESIZE[1], RESIZE[0])
             else:
+                X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
                 for i, ind in enumerate(batch_index):
                     if shifts:
                         X_batch[i] = random_shift(X[ind - frames + 1:ind + 1, :], .1, .1)
