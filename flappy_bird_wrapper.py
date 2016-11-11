@@ -11,7 +11,7 @@ SCREENHEIGHT = 512
 pygame.init()
 FPSCLOCK = pygame.time.Clock()
 SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
-pygame.display.set_caption('Flappy Bird')
+# pygame.display.set_caption('Flappy Bird')
 
 IMAGES, SOUNDS, HITMASKS = fpu.load()
 PIPEGAPSIZE = 300 # gap between upper and lower part of pipe
@@ -25,7 +25,7 @@ BACKGROUND_WIDTH = IMAGES['background'].get_width()
 
 PLAYER_INDEX_GEN = cycle([0, 1, 2, 1])
 
-REWARDS = {'failure': -1., 'success': 1., 'default': 0}
+REWARDS = {'failure': -1., 'success': 1., 'default': 0.01}
 
 
 def getRandomPipe():
@@ -177,28 +177,28 @@ class GameState:
     def draw_sprites(self):
 
         # draw sprites
-        SCREEN.blit(IMAGES['background'], (0, 0))
+        # SCREEN.blit(IMAGES['background'], (0, 0))
 
         # Prepare image data for preprocessing
         image_data = []
 
         for uPipe, lPipe in zip(self.upperPipes, self.lowerPipes):
-            SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
+            # SCREEN.blit(IMAGES['pipe'][0], (uPipe['x'], uPipe['y']))
             image_data.append((IMAGES['pipe'][0], (uPipe['x'], uPipe['y'])))
-            SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
+            # SCREEN.blit(IMAGES['pipe'][1], (lPipe['x'], lPipe['y']))
             image_data.append((IMAGES['pipe'][1], (lPipe['x'], lPipe['y'])))
 
-        SCREEN.blit(IMAGES['base'], (self.basex, BASEY))
+        # SCREEN.blit(IMAGES['base'], (self.basex, BASEY))
         image_data.append((IMAGES['base'], (self.basex, BASEY)))
         # print score so player overlaps the score
-        self.showScore()
-        SCREEN.blit(IMAGES['player'][self.playerIndex],
-                    (self.playerx, self.playery))
+        # self.showScore()
+        # SCREEN.blit(IMAGES['player'][self.playerIndex],
+        #             (self.playerx, self.playery))
         image_data.append((IMAGES['player'][self.playerIndex],
                     (self.playerx, self.playery)))
 
-        pygame.display.update()
-        FPSCLOCK.tick(FPS)
+        # pygame.display.update()
+        # FPSCLOCK.tick(FPS)
         # print self.upperPipes[0]['y'] + PIPE_HEIGHT - int(BASEY * 0.2)
         return image_data
 
@@ -213,7 +213,7 @@ class GameState:
         Xoffset = (SCREENWIDTH - totalWidth) / 2
 
         for digit in scoreDigits:
-            SCREEN.blit(IMAGES['numbers'][digit], (Xoffset, SCREENHEIGHT * 0.1))
+            # SCREEN.blit(IMAGES['numbers'][digit], (Xoffset, SCREENHEIGHT * 0.1))
             Xoffset += IMAGES['numbers'][digit].get_width()
 
     def frame_step(self, input_action):

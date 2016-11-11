@@ -7,7 +7,7 @@ import numpy as np
 
 from keras.utils.np_utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout
+from keras.layers import Convolution2D, Activation, Dense, Flatten, Dropout, ZeroPadding2D
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing.image import img_to_array, random_shift
 
@@ -16,7 +16,7 @@ K.set_image_dim_ordering('th')
 
 from preprocessor import RESIZE
 
-FRAMES = 5
+FRAMES = 2
 ACTIONS = 2
 
 # fix random seed for reproducibility
@@ -46,7 +46,7 @@ def normalize(y, frames=FRAMES):
     amount = (1 - percent) / percent
     return np.hstack([np.arange(frames-1, y.shape[0])] + [inds[0] for i in xrange(int(amount))])
 
-def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=True):
+def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=False, difference=True):
     # adapted from chenglong code for fiting from generator (https://www.kaggle.com/c/talkingdata-mobile-user-demographics/forums/t/22567/neural-network-for-sparse-matrices)
     counter = 0
     sample_index = normalize(y[:, 1])
@@ -56,22 +56,28 @@ def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=True):
     while True:
         batch_index = sample_index[batch_size * counter:batch_size * (counter + 1)]
         X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
-        for i, ind in enumerate(batch_index):
-            if shifts:
-                X_batch[i] = random_shift(X[ind-frames+1:ind+1, :], .1, .1)
-            else:
-                X_batch[i] = X[ind - frames + 1:ind + 1, :]
+        if difference:
+            X_batch = X[batch_index] - X[batch_index-1]
+        else:
+            for i, ind in enumerate(batch_index):
+                if shifts:
+                    X_batch[i] = random_shift(X[ind-frames+1:ind+1, :], .1, .1)
+                else:
+                    X_batch[i] = X[ind - frames + 1:ind + 1, :]
         y_batch = y[batch_index]
         counter += 1
         yield X_batch, y_batch
         if counter == number_of_batches - 1:
             batch_index = sample_index[batch_size * counter:]
             X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
-            for i, ind in enumerate(batch_index):
-                if shifts:
-                    X_batch[i] = random_shift(X[ind - frames + 1:ind + 1, :], .1, .1)
-                else:
-                    X_batch[i] = X[ind - frames + 1:ind + 1, :]
+            if difference:
+                X_batch = X[batch_index] - X[batch_index - 1]
+            else:
+                for i, ind in enumerate(batch_index):
+                    if shifts:
+                        X_batch[i] = random_shift(X[ind - frames + 1:ind + 1, :], .1, .1)
+                    else:
+                        X_batch[i] = X[ind - frames + 1:ind + 1, :]
             y_batch = y[batch_index]
             counter += 1
             yield X_batch, y_batch
@@ -101,6 +107,39 @@ def conv_model(frames=FRAMES):
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
     return model
 
+def deep_model():
+    model = Sequential()
+
+    model.add(ZeroPadding2D((1, 1), input_shape=(1, RESIZE[1], RESIZE[0])))
+    model.add(Convolution2D(64, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(64, 3, 3, subsample=(2, 2), activation='relu'))
+
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(128, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(128, 3, 3, subsample=(2, 2), activation='relu'))
+
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(256, 3, 3, subsample=(2,2), activation='relu'))
+
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1, 1)))
+    model.add(Convolution2D(512, 3, 3, subsample=(2,2), activation='relu'))
+
+    model.add(Flatten())
+    model.add(Dense(4096, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(2, activation='softmax'))
 
 def split_data(X, y, split=.9):
 
@@ -113,7 +152,7 @@ X_full, y_full = load_data()
 y_full = to_categorical(y_full, ACTIONS)
 Xtr, ytr, Xval, yval = split_data(X_full, y_full)
 
-model = conv_model()
+model = deep_model()
 history = model.fit_generator(batch_gen(Xtr, ytr, shifts=False), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
                               validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
                               callbacks=[ModelCheckpoint('conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',

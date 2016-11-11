@@ -11,7 +11,10 @@ from scipy.special import expit
 
 from keras.models import Sequential
 from keras.layers import Convolution2D, Activation, Flatten, Dense, Input, Dropout
+from keras.initializations import normal, identity
 from keras.regularizers import WeightRegularizer
+from keras.optimizers import SGD , Adam
+
 
 import matplotlib.pyplot as plt
 
@@ -29,7 +32,7 @@ def discount_rewards(r):
     discounted_r = np.zeros_like(r)
     running_add = 0
     for t in reversed(xrange(0, r.size)):
-        if r[t] != 0:
+        if r[t] != 0.01:
             running_add = 0  # reset the sum, since this was a game boundary (pong specific!)
         running_add = running_add * gamma + r[t]
         discounted_r[t] = running_add
@@ -73,6 +76,32 @@ def simple_model():
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+    return model
+
+def model2():
+    print("Now we build the model")
+    model = Sequential()
+    model.add(
+        Convolution2D(32, 8, 8, subsample=(4, 4), # init=lambda shape, name: normal(shape, scale=0.01, name=name),
+                      border_mode='same', input_shape=(4, RESIZE[1], RESIZE[0])))
+    model.add(Activation('relu'))
+    model.add(
+        Convolution2D(64, 4, 4, subsample=(2, 2), # init=lambda shape, name: normal(shape, scale=0.01, name=name),
+                      border_mode='same'))
+    model.add(Activation('relu'))
+    model.add(
+        Convolution2D(64, 3, 3, subsample=(1, 1), # init=lambda shape, name: normal(shape, scale=0.01, name=name),
+                      border_mode='same'))
+    model.add(Activation('relu'))
+    model.add(Flatten())
+    model.add(Dense(512, init=lambda shape, name: normal(shape, scale=0.01, name=name)))
+    model.add(Activation('relu'))
+    model.add(Dense(2, init=lambda shape, name: normal(shape, scale=0.01, name=name)))
+    model.add(Activation('softmax'))
+
+    adam = Adam(lr=1e-6)
+    model.compile(loss='categorical_crossentropy', optimizer=adam)
+    print("We finish building the model")
     return model
 
 
@@ -134,10 +163,10 @@ def fit(model, ep_batch=1):
 
         # y[np.array(actions) == 0] *= -1
 
-        print("Probabilities", np.around(p, 4))
-        print("Labels: ", np.around(y, 2))
+        # print("Probabilities", np.around(p, 4))
+        # print("Labels: ", np.around(y, 2))
 
-        model.fit(np.vstack(inputs), y, nb_epoch=1, shuffle=False)
+        model.fit(np.vstack(inputs), y, nb_epoch=1, shuffle=False, verbose=0)
 
         # Increment the number of games we've played
         ep_count += ep_batch
@@ -145,10 +174,10 @@ def fit(model, ep_batch=1):
         # Calculate the avg reward and score per episode as a metric
         avg_reward = avg_eps(r, ep_batch)
         avg_score = avg_eps(r > 0, ep_batch)
-
-        print('EPISODES PLAYED: %s' % ep_count)
-        print('AVERAGE REWARD: %s' % avg_reward)
-        print('AVERAGE SCORE: %s' % avg_score)
+        if ep_count % 100 == 0:
+            print('EPISODES PLAYED: %s' % ep_count)
+            print('AVERAGE REWARD: %s' % avg_reward)
+            print('AVERAGE SCORE: %s' % avg_score)
 
         # Save the model every 100 episodes
         if ep_count % 100 == 0:
@@ -163,7 +192,8 @@ def fit(model, ep_batch=1):
 
 
 def main():
-    model = conv_model()
+    model = model2()
+    model.load_weights('models/2100eps_2.2r_1scr_weights.h5')
     fit(model)
 
 if __name__ == '__main__':
