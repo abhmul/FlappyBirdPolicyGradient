@@ -114,27 +114,23 @@ def deep_model():
 
     model.add(ZeroPadding2D((1, 1), input_shape=(1, RESIZE[1], RESIZE[0])))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(64, 3, 3, subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(64, 2, 2, subsample=(2, 2), activation='relu'))
 
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(128, 3, 3, subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(128, 2, 2, subsample=(2, 2), activation='relu'))
 
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(256, 3, 3, subsample=(2,2), activation='relu'))
+    model.add(Convolution2D(256, 2, 2, subsample=(2,2), activation='relu'))
 
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1, 1)))
-    model.add(Convolution2D(512, 3, 3, subsample=(2,2), activation='relu'))
+    model.add(Convolution2D(512, 2, 2, subsample=(2,2), activation='relu'))
 
     model.add(Flatten())
     model.add(Dense(4096, activation='relu'))
