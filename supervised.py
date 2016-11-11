@@ -145,13 +145,13 @@ def deep_model():
 def line_model():
     img = Input((1, RESIZE[1], RESIZE[0]), name='image')
 
-    x = Convolution2D(64, 3, RESIZE[0], activation='relu')(img)
-    y = Convolution2D(64, RESIZE[1], 3, activation='relu')(img)
+    xs = [Convolution2D(2**(7+(1-i)/2), i, RESIZE[0], activation='relu')(img) for i in xrange(1, 10, 2)]
+    ys = [Convolution2D(2**(7+(1-i)/2), RESIZE[1], i, activation='relu')(img) for i in xrange(1, 10, 2)]
 
-    x = Flatten()(x)
-    y = Flatten()(y)
+    xs = [Flatten()(x) for x in xs]
+    ys = [Flatten()(y) for y in ys]
 
-    xy = merge([x, y], mode='concat')
+    xy = merge(xs+ys, mode='concat')
 
     xy = Dense(4096, activation='relu')(xy)
     xy = Dropout(0.5)(xy)
@@ -180,7 +180,7 @@ Xtr, ytr, Xval, yval = split_data(X_full, y_full)
 model = line_model()
 history = model.fit_generator(batch_gen(Xtr, ytr, shifts=False), samples_per_epoch=normalize(ytr[:, 1]).shape[0], nb_epoch=100,
                               validation_data=batch_gen(Xval, yval, shifts=False), nb_val_samples=normalize(yval[:, 1]).shape[0],
-                              callbacks=[ModelCheckpoint('conv_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+                              callbacks=[ModelCheckpoint('line_model.weights.{epoch:02d}-{val_loss:.2f}.hdf5',
                                                          monitor='val_loss', verbose=0, save_best_only=False,
                                                          save_weights_only=True, mode='auto')])
 #
