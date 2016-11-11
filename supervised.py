@@ -16,7 +16,7 @@ K.set_image_dim_ordering('th')
 
 from preprocessor import RESIZE
 
-FRAMES = 2
+FRAMES = 4
 ACTIONS = 2
 
 # fix random seed for reproducibility
@@ -56,7 +56,7 @@ def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=False, di
     while True:
         batch_index = sample_index[batch_size * counter:batch_size * (counter + 1)]
         if difference:
-            X_batch = X[batch_index] - X[batch_index-1]
+            X_batch = X[batch_index] - X[batch_index-frames+1]
             X_batch = X_batch.reshape(-1, 1, RESIZE[1], RESIZE[0])
         else:
             X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
@@ -71,7 +71,7 @@ def batch_gen(X, y, frames=FRAMES, batch_size=64, shuffle=True, shifts=False, di
         if counter == number_of_batches - 1:
             batch_index = sample_index[batch_size * counter:]
             if difference:
-                X_batch = X[batch_index] - X[batch_index - 1]
+                X_batch = X[batch_index] - X[batch_index - frames+1]
                 X_batch = X_batch.reshape(-1, 1, RESIZE[1], RESIZE[0])
             else:
                 X_batch = np.zeros((batch_index.shape[0], frames, RESIZE[1], RESIZE[0]))
@@ -114,23 +114,23 @@ def deep_model():
 
     model.add(ZeroPadding2D((1, 1), input_shape=(1, RESIZE[1], RESIZE[0])))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(Convolution2D(64, 2, 2, subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(64, 3, 3, subsample=(2, 2), activation='relu'))
 
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(Convolution2D(128, 2, 2, subsample=(2, 2), activation='relu'))
+    model.add(Convolution2D(128, 3, 3, subsample=(2, 2), activation='relu'))
 
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(Convolution2D(256, 2, 2, subsample=(2,2), activation='relu'))
+    model.add(Convolution2D(256, 3, 3, subsample=(2,2), activation='relu'))
 
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(Convolution2D(512, 2, 2, subsample=(2,2), activation='relu'))
+    model.add(Convolution2D(512, 3, 3, subsample=(2,2), activation='relu'))
 
     model.add(Flatten())
     model.add(Dense(4096, activation='relu'))
